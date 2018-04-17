@@ -368,8 +368,8 @@ namespace App4
 
                     });
 
-                    string subscriptionKey = "9ac24b5d827045919daf899ef2d5484e";
-                    string subscriptionEndpoint = "https://southcentralus.api.cognitive.microsoft.com/face/v1.0";
+                    string subscriptionKey = "[Your Key]";
+                    string subscriptionEndpoint = "[Your Subscription EndPoint]";
                     var faceServiceClient = new FaceServiceClient(subscriptionKey, subscriptionEndpoint);
 
                     try
