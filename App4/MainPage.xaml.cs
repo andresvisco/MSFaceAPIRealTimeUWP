@@ -360,13 +360,13 @@ namespace App4
                     arrayImage = await EncodedBytes(displayableImage, BitmapEncoder.BmpEncoderId);
                     var nuevoStreamFace = new MemoryStream(arrayImage);
 
-                    var ignored1 = this.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
-                    {
-                        softwareBitmapSource.SetBitmapAsync(displayableImage);
+                    //var ignored1 = this.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+                    //{
+                    //    softwareBitmapSource.SetBitmapAsync(displayableImage);
 
-                        imagenCamaraWeb.Source = softwareBitmapSource;
+                    //    imagenCamaraWeb.Source = softwareBitmapSource;
 
-                    });
+                    //});
 
                     string subscriptionKey = "9ac24b5d827045919daf899ef2d5484e";
                     string subscriptionEndpoint = "https://southcentralus.api.cognitive.microsoft.com/face/v1.0";
