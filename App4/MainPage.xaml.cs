@@ -24,13 +24,9 @@ using Windows.UI.Xaml;
 using Windows.UI.Xaml.Navigation;
 using System.Threading;
 
-// The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
 namespace App4
 {
-    /// <summary>
-    /// An empty page that can be used on its own or navigated to within a Frame.
-    /// </summary>
     public sealed partial class MainPage : Page
     {
         #region ClasesInicializadasPrincipal
@@ -104,7 +100,7 @@ namespace App4
         {
             get
             {
-                return "2f30c8b9-216e-4b74-9294-6b93d9cda686";
+                return "[Your LargePersonGroup Id]";
             }
 
             set
@@ -113,19 +109,12 @@ namespace App4
             }
         }
 
-        //private async void btnTomarFoto_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e)
-        //{
-        //    using (VideoFrame previewFrame = new VideoFrame(InputPixelFormat, (int)this.videoProperties.Width, (int)this.videoProperties.Height))
-        //    {
-
-        //    }
-        //}
+        
         private void CameraStreamingButton_Click(object sender, RoutedEventArgs e)
         {
             IdentidadEncontrada = "";
             if (this.currentState == ScenarioState.Streaming)
             {
-                //this.rootPage.NotifyUser(string.Empty, NotifyType.StatusMessage);
                 this.ChangeScenarioState(ScenarioState.Idle);
                 btnIniciarStream.Content = "Iniciar Streamming";
             }
@@ -138,8 +127,6 @@ namespace App4
         }
         private void MediaCapture_CameraStreamFailed(MediaCapture sender, object args)
         {
-            // MediaCapture is not Agile and so we cannot invoke its methods on this caller's thread
-            // and instead need to schedule the state change on the UI thread.
             var ignored = this.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
             {
                 ChangeScenarioState(ScenarioState.Idle);
@@ -168,13 +155,10 @@ namespace App4
             }
             catch (System.UnauthorizedAccessException)
             {
-                // If the user has disabled their webcam this exception is thrown; provide a descriptive message to inform the user of this fact.
-                //this.rootPage.NotifyUser("Webcam is disabled or access to the webcam is disabled for this app.\nEnsure Privacy Settings allow webcam usage.", NotifyType.ErrorMessage);
                 successful = false;
             }
             catch (Exception ex)
             {
-                //this.rootPage.NotifyUser(ex.ToString(), NotifyType.ErrorMessage);
                 successful = false;
             }
             return successful;
@@ -221,7 +205,7 @@ namespace App4
                     }
                     catch (Exception)
                     {
-                        ;   // Since we're going to destroy the MediaCapture object there's nothing to do here
+                        
                     }
                 }
                 this.mediaCapture.Dispose();
@@ -234,7 +218,7 @@ namespace App4
         }
         private async void ChangeScenarioState(ScenarioState newState)
         {
-            // Disable UI while state change is in progress
+            
             switch (newState)
             {
                 case ScenarioState.Idle:
@@ -268,8 +252,7 @@ namespace App4
                 return;
             }
 
-            // If a lock is being held it means we're still waiting for processing work on the previous frame to complete.
-            // In this situation, don't wait on the semaphore but exit immediately.
+            
             if (!frameProcessingSemaphore.Wait(0))
             {
                 return;
@@ -295,8 +278,6 @@ namespace App4
                             this.SetupVisualization(previewFrameSize, faces);
 
 
-                        //this.imagenCompletar.Source = bitmpatSRC;
-                        //bitmpatSRC.SetBitmapAsync(previewFrameBMO);
                     });
 
                         faces = await this.faceTracker.ProcessNextFrameAsync(previewFrame);
@@ -376,9 +357,6 @@ namespace App4
                     {
                         
 
-                        // using (var fsStream = File.OpenRead(sampleFile))
-                        // {
-
                         var faces = await faceServiceClient.DetectAsync(nuevoStreamFace);
 
                         
@@ -386,7 +364,6 @@ namespace App4
 
                         for (int idx = 0; idx < faces.Length; idx++)
                         {
-                            // Update identification result for rendering
 
                             var res = resultadoIdentifiacion[idx];
                             
@@ -516,8 +493,6 @@ namespace App4
         {
             byte[] array = null;
 
-            // First: Use an encoder to copy from SoftwareBitmap to an in-mem stream (FlushAsync)
-            // Next:  Use ReadAsync on the in-mem stream to get byte[] array
 
             using (ms = new InMemoryRandomAccessStream())
             {
