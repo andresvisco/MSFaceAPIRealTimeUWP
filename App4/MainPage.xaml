@@ -21,12 +21,19 @@
                 <RowDefinition Height="40"></RowDefinition>
                 <RowDefinition Height="40"></RowDefinition>
                 <RowDefinition Height="40"></RowDefinition>
+                <RowDefinition Height="200"></RowDefinition>
                 <RowDefinition Height="40"></RowDefinition>
                 <RowDefinition Height="40"></RowDefinition>
             </Grid.RowDefinitions>
             <Button Grid.Column="0" Grid.Row="0" VerticalAlignment="Top" Click="btnTomarFoto_Click" Name="btnTomarFoto">Tomar Foto</Button>
             <Button Grid.Column="0" Grid.Row="1" VerticalAlignment="Top" Name="btnIniciarStream" Click="CameraStreamingButton_Click" >Iniciar Streamming</Button>
             <TextBlock Grid.Column="0" Grid.Row="2" HorizontalAlignment="Left" x:Name="txtResult" Width="200" Height="40" FocusVisualPrimaryBrush="#FFC5FF00"></TextBlock>
+            <Image x:Name="imgPreview" Width="150" Height="150" Grid.Column="0" Grid.Row="4"></Image>
+            <Button Content="Altas" HorizontalAlignment="Left" Grid.Row="3" VerticalAlignment="Center" Click="Button_Click"/>
+            <MediaElement HorizontalAlignment="Left" Height="100" Margin="62,198,0,0" Grid.Row="5" VerticalAlignment="Top" Width="100" x:Name="mediaPlayerUWP" />
+            <TextBox x:Name="textoADecir" Grid.Row="5" Grid.Column="0" Text="hola"></TextBox>
+            <Button x:Name="ObtenerAudio" Grid.Row="6" Grid.Column="0" Click="ObtenerAudioManual_Click">Obtener Audio</Button>
+            <TextBox x:Name="textoADecir_Copy" Grid.Row="4" Grid.Column="0" Text="hola" HorizontalAlignment="Left" Margin="0,158,0,0" VerticalAlignment="Top"/>
 
         </Grid>
         <Grid Grid.Column="1">

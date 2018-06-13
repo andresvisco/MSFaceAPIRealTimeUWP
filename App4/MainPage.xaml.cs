@@ -23,6 +23,9 @@ using Windows.UI.Xaml.Media;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Navigation;
 using System.Threading;
+using App5;
+using Windows.Storage;
+
 
 // The Blank Page item template is documented at https://go.microsoft.com/fwlink/?LinkId=402352&clcid=0x409
 
@@ -31,6 +34,24 @@ namespace App4
     /// <summary>
     /// An empty page that can be used on its own or navigated to within a Frame.
     /// </summary>
+    /// 
+    
+    public class Identidades
+    {
+        public void Identidad(GenericEventArgs<string> e)
+        {
+            EventHandler<GenericEventArgs<string>> handler = this.TieneIdentidad;
+            if (handler != null)
+            {
+                handler(this, e);
+            }
+
+        }
+
+        public event EventHandler<GenericEventArgs<string>> TieneIdentidad;
+
+    }
+    
     public sealed partial class MainPage : Page
     {
         #region ClasesInicializadasPrincipal
@@ -39,7 +60,7 @@ namespace App4
         private ThreadPoolTimer frameProcessingTimer;
         const BitmapPixelFormat InputPixelFormat = BitmapPixelFormat.Bgra8;
         public InMemoryRandomAccessStream ms;
-        
+
         IList<DetectedFace> faces = null;
         private FaceTracker faceTracker;
         private ScenarioState currentState;
@@ -88,7 +109,9 @@ namespace App4
         #region Constructor Main Page
         public MainPage()
         {
-
+            ApplicationDataContainer localSettings = Windows.Storage.ApplicationData.Current.LocalSettings;
+            localSettings.Values["valorIdGroup"] = "1";
+            Identidades identidades = new Identidades();
 
             this.InitializeComponent();
             this.currentState = ScenarioState.Idle;
@@ -99,12 +122,16 @@ namespace App4
 
         }
         #endregion Constructor
+        public async void ObtenerLaIdentidad(object sender, GenericEventArgs<string> args)
+        {
+            ObtenerAudio_Click(args.EventData.ToString());
+        }
 
         public string GroupId
         {
             get
             {
-                return "2f30c8b9-216e-4b74-9294-6b93d9cda686";
+                return "1";
             }
 
             set
@@ -113,6 +140,7 @@ namespace App4
             }
         }
 
+        
         //private async void btnTomarFoto_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e)
         //{
         //    using (VideoFrame previewFrame = new VideoFrame(InputPixelFormat, (int)this.videoProperties.Width, (int)this.videoProperties.Height))
@@ -261,15 +289,17 @@ namespace App4
         }
         public SoftwareBitmapSource softwareBitmapSource = new SoftwareBitmapSource();
 
+
+        public Identidades identidades = new Identidades();
+
         private async void ProcessCurrentVideoFrame(ThreadPoolTimer timer)
         {
+
             if (this.currentState != ScenarioState.Streaming)
             {
                 return;
             }
 
-            // If a lock is being held it means we're still waiting for processing work on the previous frame to complete.
-            // In this situation, don't wait on the semaphore but exit immediately.
             if (!frameProcessingSemaphore.Wait(0))
             {
                 return;
@@ -285,7 +315,7 @@ namespace App4
                 {
                     var valor = await this.mediaCapture.GetPreviewFrameAsync(previewFrame);
 
-                    
+
                     if (FaceDetector.IsBitmapPixelFormatSupported(previewFrame.SoftwareBitmap.BitmapPixelFormat))
                     {
                         var previewFrameSize = new Windows.Foundation.Size(previewFrame.SoftwareBitmap.PixelWidth, previewFrame.SoftwareBitmap.PixelHeight);
@@ -295,21 +325,28 @@ namespace App4
                             this.SetupVisualization(previewFrameSize, faces);
 
 
-                        //this.imagenCompletar.Source = bitmpatSRC;
-                        //bitmpatSRC.SetBitmapAsync(previewFrameBMO);
-                    });
-
+                            //this.imagenCompletar.Source = bitmpatSRC;
+                            //bitmpatSRC.SetBitmapAsync(previewFrameBMO);
+                        });
                         faces = await this.faceTracker.ProcessNextFrameAsync(previewFrame);
-                        if(faces.Count != 0 && IdentidadEncontrada == "")
+                        if (faces.Count != 0 && IdentidadEncontrada == "")
                         {
-                            string[] nombre = null;
+                            string nombre = "";
                             int contador = 0;
-                            foreach(var caraEncontrad in faces)
+                            foreach (var caraEncontrad in faces)
                             {
-                                nombre[contador] = await ObtenerIdentidad();
+                                var cara = caraEncontrad.FaceBox.ToString();
+
+                                nombre = await ObtenerIdentidad();
+
                                 contador += 1;
+                                IdentidadEncontrada = nombre;
+                                identidades.Identidad(new GenericEventArgs<string>(IdentidadEncontrada));
+
+
                             }
-                            
+
+
                         }
 
                     }
@@ -319,7 +356,7 @@ namespace App4
                     }
 
 
-                    
+
                 }
             }
             catch (Exception ex)
@@ -335,10 +372,14 @@ namespace App4
             }
 
         }
-        private async Task<string> ObtenerIdentidad()
+
+
+        public async Task<string> ObtenerIdentidad()
         {
             byte[] arrayImage;
             var PersonName = "";
+
+            identidades.TieneIdentidad += ObtenerLaIdentidad;
 
             try
             {
@@ -347,6 +388,7 @@ namespace App4
                 using (VideoFrame previewFrame = new VideoFrame(InputPixelFormat1, (int)this.videoProperties.Width, (int)this.videoProperties.Height))
                 {
                     var valor = await this.mediaCapture.GetPreviewFrameAsync(previewFrame);
+                    
 
                     SoftwareBitmap softwareBitmapPreviewFrame = valor.SoftwareBitmap;
 
@@ -368,38 +410,45 @@ namespace App4
 
                     //});
 
-                    string subscriptionKey = "9ac24b5d827045919daf899ef2d5484e";
-                    string subscriptionEndpoint = "https://southcentralus.api.cognitive.microsoft.com/face/v1.0";
+                    string subscriptionKey = "c568304102b84df291d2556d34c8d623";
+                    string subscriptionEndpoint = "https://eastus2.api.cognitive.microsoft.com/face/v1.0";
                     var faceServiceClient = new FaceServiceClient(subscriptionKey, subscriptionEndpoint);
 
                     try
                     {
-                        
+
 
                         // using (var fsStream = File.OpenRead(sampleFile))
                         // {
+                        IEnumerable<FaceAttributeType> faceAttributes =
+                new FaceAttributeType[] { FaceAttributeType.Gender, FaceAttributeType.Age, FaceAttributeType.Smile, FaceAttributeType.Emotion, FaceAttributeType.Glasses, FaceAttributeType.Hair };
 
-                        var faces = await faceServiceClient.DetectAsync(nuevoStreamFace);
 
-                        
+                        var faces = await faceServiceClient.DetectAsync(nuevoStreamFace,true,false,faceAttributes);
+
+                        string edad="";
                         var resultadoIdentifiacion = await faceServiceClient.IdentifyAsync(faces.Select(ff => ff.FaceId).ToArray(), largePersonGroupId: this.GroupId);
 
                         for (int idx = 0; idx < faces.Length; idx++)
                         {
                             // Update identification result for rendering
+                            edad = faces[idx].FaceAttributes.Age.ToString();
+
 
                             var res = resultadoIdentifiacion[idx];
-                            
+
                             if (res.Candidates.Length > 0)
                             {
                                 var nombrePersona = await faceServiceClient.GetPersonInLargePersonGroupAsync(GroupId, res.Candidates[0].PersonId);
                                 PersonName = nombrePersona.Name.ToString();
+                                //var estadoAnimo = 
                                 var ignored2 = this.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
                                 {
                                     
+
                                     txtResult.Text = nombrePersona.Name.ToString();
-                                    IdentidadEncontrada = txtResult.Text;
-                                    
+                                
+
 
                                 });
                             }
@@ -416,15 +465,63 @@ namespace App4
                         var error = ex.Message.ToString();
                     }
                 }
-            }catch(Exception ex)
+            }
+            catch (Exception ex)
             {
                 var mensaje = ex.Message.ToString();
             }
             return PersonName;
 
         }
+        public MediaElement MediaElementThread = new MediaElement();
+
+        public async void PlayAudio(object sender, GenericEventArgs<Stream> args)
+        {
+            Stream readStream = args.EventData;
+
+            try
+            {
+                var arrayAudio = await ReadFully(readStream);
+                MemoryStream memoryStream = new MemoryStream(arrayAudio);
+                IRandomAccessStream randomAccessStream = memoryStream.AsRandomAccessStream();
+                var ignored = this.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+                {
+
+                   // ShutdownWebCam();
+                    
+                    MediaElementThread.AutoPlay = true;
+                    MediaElementThread.SetSource(randomAccessStream, "audio/wav");
+                    MediaElementThread.Play();
+                });
+
+               
+
+                    //this.rootPage.NotifyUser(ex.ToString(), NotifyType.ErrorMessage);
+               
+                
 
 
+            }
+            catch (Exception ex){
+                var mensaje = ex.Message.ToString();
+            };
+            
+            
+
+        }
+        public async Task<byte[]> ReadFully(Stream input)
+        {
+            byte[] buffer = new byte[16 * 1024];
+            using (MemoryStream ms = new MemoryStream())
+            {
+                int read;
+                while ((read = input.Read(buffer, 0, buffer.Length)) > 0)
+                {
+                    ms.Write(buffer, 0, read);
+                }
+                return ms.ToArray();
+            }
+        }
         private enum ScenarioState
         {
 
@@ -450,7 +547,7 @@ namespace App4
                 {
 
                     Rectangle box = new Rectangle();
-                    
+
                     box.Width = (int)face.FaceBox.Width / (int)widthScale;
                     box.Height = (int)(face.FaceBox.Height / heightScale);
                     box.Fill = this.fillBrush;
@@ -461,7 +558,7 @@ namespace App4
 
                     TextBlock texto = new TextBlock();
                     texto.Text = IdentidadEncontrada;
-                    texto.Margin = new Thickness((uint)(face.FaceBox.X / widthScale), (uint)(face.FaceBox.Y / heightScale)-15, 0, 0);
+                    texto.Margin = new Thickness((uint)(face.FaceBox.X / widthScale), (uint)(face.FaceBox.Y / heightScale) - 15, 0, 0);
                     texto.Foreground = this.lineBrush;
                     this.VisualizationCanvas.Children.Add(texto);
 
@@ -477,7 +574,7 @@ namespace App4
         {
             txtResult.Text = "";
 
-           // await ProcessCurrentVideoFrame();
+            // await ProcessCurrentVideoFrame();
         }
 
         public ObservableCollection<Face> TargetFaces
@@ -493,7 +590,7 @@ namespace App4
             using (InMemoryRandomAccessStream stream = new InMemoryRandomAccessStream())
             {
                 BitmapEncoder encoder = await BitmapEncoder.CreateAsync(BitmapEncoder.JpegEncoderId, stream);
-               
+
 
                 encoder.SetSoftwareBitmap(softwareBitmap);
                 encoder.BitmapTransform.InterpolationMode = BitmapInterpolationMode.Linear;
@@ -547,7 +644,72 @@ namespace App4
             }
         }
 
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+            this.Frame.Navigate(typeof(Altas));
+
+        }
+        public Task obtenerAudio;
+        public Synthetize synthetize = new Synthetize();
+
         
 
+        public async void ObtenerAudio_Click(string nombre)//(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+
+                ObtenerSaludoSpeech obtenerSaludoSpeech = new ObtenerSaludoSpeech();
+                string Url = "https://api.cognitive.microsoft.com/sts/v1.0/issueToken";
+                string ApiKey = "6afb740302e84f26b7cc06870d4d902c";
+                var token = await obtenerSaludoSpeech.HttpPost(Url, ApiKey);
+
+                //var token = obtenerSaludoSpeech.ObntenerSaludoSpeechTexto("hola").ToString();
+
+
+
+
+                synthetize.OnAudioAvailable += PlayAudio;
+
+                string requestUri = "https://speech.platform.bing.com/synthesize";
+                string texto = nombre;//"hola " + nombre;
+                obtenerAudio = synthetize.Speak(CancellationToken.None, new Synthetize.InputOptions(texto)
+                {
+                    RequestUri = new Uri(requestUri),
+                    // Text to be spoken.
+                    Text = texto,
+                    VoiceType = Gender.Female,
+                    // Refer to the documentation for complete list of supported locales.
+                    Locale = "en-US",
+
+                    // You can also customize the output voice. Refer to the documentation to view the different
+                    // voices that the TTS service can output.
+                    VoiceName = "Microsoft Server Speech Text to Speech Voice (en-US, ZiraRUS)",
+                    // Service can return audio in different output format.
+                    OutputFormat = AudioOutputFormat.Riff8Khz8BitMonoMULaw,
+                    AuthorizationToken = "Bearer " + token,
+                });
+            }
+            catch (Exception ex)
+            {
+                var ignored = this.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+                {
+                    textoADecir_Copy.Text = ex.Message.ToString();
+                });
+            }
+            
+        }
+
+        private async void ObtenerAudioManual_Click(object sender, RoutedEventArgs e)
+        {
+            try
+            {
+                ObtenerAudio_Click(textoADecir.Text.ToString());
+            }catch(Exception ex)
+            {
+                var error = ex.Message.ToString();
+            }
+
+        }
     }
 }
