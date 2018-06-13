@@ -689,6 +689,7 @@ namespace App4
                     OutputFormat = AudioOutputFormat.Riff8Khz8BitMonoMULaw,
                     AuthorizationToken = "Bearer " + token,
                 });
+
             }
             catch (Exception ex)
             {
