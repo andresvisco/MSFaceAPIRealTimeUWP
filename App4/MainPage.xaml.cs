@@ -341,13 +341,13 @@ namespace App4
                     arrayImage = await EncodedBytes(displayableImage, BitmapEncoder.BmpEncoderId);
                     var nuevoStreamFace = new MemoryStream(arrayImage);
 
-                    var ignored1 = this.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
-                    {
-                        softwareBitmapSource.SetBitmapAsync(displayableImage);
+                    //var ignored1 = this.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+                    //{
+                    //    softwareBitmapSource.SetBitmapAsync(displayableImage);
 
-                        imagenCamaraWeb.Source = softwareBitmapSource;
+                    //    imagenCamaraWeb.Source = softwareBitmapSource;
 
-                    });
+                    //});
 
                     string subscriptionKey = "[Your Key]";
                     string subscriptionEndpoint = "[Your Subscription EndPoint]";
